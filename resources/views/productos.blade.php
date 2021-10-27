@@ -107,7 +107,7 @@
 
             <ul class="navbar-nav mt-2 mt-lg-0">
                 <li class="nav-item">
-                  <a class="nav-link" href="{{ route('login') }}">Cerrar Sesión</a>
+                  <a class="nav-link" href="{{ route('cerrar-sesion') }} ">Cerrar Sesión</a>
                 </li>
             </ul>
             
@@ -161,7 +161,8 @@
             largo:'',
             alto:''
         },
-        mounted(){            
+        mounted(){
+
             this.cargarProductos();
         },
         methods: {
@@ -188,8 +189,8 @@
 
             productoSeleccionado: function(item){      
                 localStorage.setItem('producto', JSON.stringify(item))
-
-                /*const existeProductoo = localStorage.getItem('producto')
+                
+                /*const existeProductos = localStorage.getItem('producto')
 
                 if( existeProductos ) {
                 // Si existe. Entonces añadir

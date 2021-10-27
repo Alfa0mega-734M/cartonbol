@@ -1,7 +1,5 @@
 @extends('layouts.principal')
 @section('styles')
-    
-
     <style>
         .nav-principal{
             box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
@@ -26,10 +24,7 @@
             height: 270px;
             margin: 0 auto;
             object-fit: cover;
-        }
-
-       
-
+        }     
     </style>
 @endsection
 
@@ -56,7 +51,7 @@
 
             <ul class="navbar-nav mt-2 mt-lg-0">
                 <li class="nav-item">
-                  <a class="nav-link" href="{{ route('login') }}">Cerrar Sesión</a>
+                    <a class="nav-link" href="{{ route('cerrar-sesion') }}">Cerrar Sesión</a>
                 </li>
             </ul>
             
@@ -66,7 +61,7 @@
 
 </nav>
 
-  <section class="container">    
+<section class="container">    
     <div class="row mb-5" v-show='!mostrandoCarrito'>   
 
         <div class="col-md-2 mt-5"></div>
@@ -77,23 +72,23 @@
             
 
             <h4 class="text-left font-weight-bold" v-text='seleccionado.nombre'></h4>
-            {{-- <p><strong> Precio: </strong> Bs./ <span>@{{ seleccionado.precio_unitario_act }}</span></p> --}}
+             <p><strong> Precio: </strong> Bs./ <span>@{{ seleccionado.precio_unitario_act }}</span></p>
              <p>
                 <strong> Ancho: </strong><span>@{{ seleccionado.ancho }}</span> </p>
-            {{--    <strong> Largo: </strong><span>@{{ seleccionado.largo }}</span>
+               <strong> Largo: </strong><span>@{{ seleccionado.largo }}</span>
                 <strong> Alto: </strong><span>@{{ seleccionado.alto }}</span>
-            </p>            --}}
+            </p>            
 
 
             
-            {{-- <p>
+             <p>
                 <strong v-if='seleccionado.calidad'> Calidad: </strong><span>@{{ seleccionado.calidad.nombre }}</span> 
                 <strong> Tipo lamina: </strong><span>@{{ seleccionado.tipo_lamina.nombre }}</span>
             </p>  
 
             <p>
                 <strong> Cantidad disponible: </strong> <span>@{{ seleccionado.ordenes_de_produccion[0].cant_act }}</span>
-            </p>  --}}
+            </p>
             
 
 
@@ -137,13 +132,15 @@
         </div>
         
         <div class="table-responsive col-md-12 mt-5">
-            <h6>Su carrito contiene: @{{ carrito.length}} productos</h6>
+            <h6 v-if="carrito.length>1">Su carrito contiene: @{{ carrito.length}} productos</h6>
+            <h6 v-else>Su carrito contiene: @{{ carrito.length}} producto</h6>
                 <table class="table table-hover text-center">
                     <thead>
                       <tr>
                         <th scope="col">#</th>
                         <th scope="col">Nombre Producto</th>
                         <th scope="col">Cantidad</th>
+                        <th scope="col">Precio Unitario</th>
                         <th scope="col">Sub Total</th>
                         <th scope="col">Editar</th>
                         <th scope="col">Eliminar</th>
@@ -154,6 +151,7 @@
                         <th scope="row" v-text="item.id"></th>
                         <td v-text="item.nombre"></td>
                         <td v-text="item.cantidad"></td>
+                        <td v-text="item.precioU"></td>
                         <td v-text="item.subTotal"></td>
                         <td><a class="btn btn-success mt-3" href="{{ route('index') }}" role="button">EDITAR</a></td>
                         <td><a class="btn btn-danger mt-3" role="button" @click="eliminar(carrito)">ELIMINAR</a></td>
@@ -164,10 +162,10 @@
               <h5>Total a pagar: @{{ suma }}</h5>
         </div>
         <div class="col text-center">
-            <a class="btn btn-primary mt-3" href="#" role="button" onclick="productoAgregado()">REALIZAR COMPRA</a>
+            <a class="btn btn-primary mt-3" href="{{ route('comprobantePDF') }}" role="button" onclick="generarComprobante()" target="_blank">REALIZAR COMPRA</a>
         </div>
         
-    </div>      
+    </div>
 
 
 
@@ -188,6 +186,17 @@
             closeOnEsc: false,
             title: "¡Producto añadido!",
             text: "Se ha añadido la cantidad indicada",
+            icon: "success",
+            button: "Aceptar!",
+        });
+    }
+
+    function generarComprobante(){
+        swal({
+            closeOnClickOutside: false,
+            closeOnEsc: false,
+            title: "¡Compra realizada!",
+            text: "Generando comprobante...",
             icon: "success",
             button: "Aceptar!",
         });
@@ -247,9 +256,7 @@
             $(".detalleCompra").hide();
             text = "Mostrar productos añadidos";
         }
-
         $("#detalleVenta").html(text);
-
     }
 
 
@@ -263,35 +270,34 @@
         },
         mounted(){     
             
-            this.carrito = JSON.parse(localStorage.getItem('carrito'))
-            
-
-            //if (localStorage.length > 0){
+            if (localStorage.length > 0){
                 this.seleccionado = JSON.parse(localStorage.getItem('producto'))
-            // }else{
-                // noSeleccionado()
+            }else{
+                noSeleccionado()
                     
-            // }
+            }
         },
         methods: {
             agregarCarrito: function(seleccionado){  
-                
+                                
                 productoAgregado();
                 this.carrito.push(
                     {
                         id:seleccionado.codigo,
                         nombre:seleccionado.nombre,
                         cantidad:Number(this.cantidad),
+                        precioU:seleccionado.precio_unitario_act,
                         subTotal:seleccionado.precio_unitario_act*this.cantidad,
                     }
                 )  
                 localStorage.setItem('carrito',JSON.stringify(this.carrito))
+                
             },
             eliminar: function(carrito){
-                //productoEliminado();
+                productoEliminado();
                 carrito.splice(0,1)
                 this.mostrandoCarrito=true;
-                localStorage.setItem('carrito',JSON.stringify(this.carrito))
+                localStorage.setItem('carrito',JSON.stringify(this.carrito))                
             },
             mostrarCarrito(){
                 this.mostrandoCarrito=true;
